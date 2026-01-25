@@ -1,6 +1,17 @@
 [project]
-name = "pythonproject"
+name = "pitch_prophet"
 version = "0.1.0"
-description = "Add your description here"
+description = "A Python application to manage and score weekly football match predictions in the Premier League."
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "sqlalchemy>=2.0.45",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
