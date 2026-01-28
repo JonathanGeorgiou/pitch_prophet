@@ -1,10 +1,11 @@
 from datetime import datetime
+from typing import Sequence
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 import db.db
-import db.models as models
+from db.models import Prediction, Result, Player, Fixture, PredictionScore
 from db.db import SessionLocal
 from db.enums import Outcome, Points
 
@@ -16,15 +17,15 @@ def get_outcome(home_goals: int, away_goals: int) -> Outcome:
         return Outcome.AWAY_WIN
     return Outcome.DRAW
 
-def is_prediction_missed(prediction: models.Prediction) -> bool:
+def is_prediction_missed(prediction: Prediction | None) -> bool:
+    if prediction is None:
+        return True
     return prediction.predicted_home_goals is None or prediction.predicted_away_goals is None
 
-def calculate_points(result: models.Result, prediction: models.Prediction) -> Points:
-    # Check if prediction was missed: -1 point
-    if is_prediction_missed(prediction):
-        ## check fixture time
-        ##
-        return Points.MISSED_PREDICTION
+def calculate_points(result: Result, prediction: Prediction | None) -> int:
+    # Safety Check: If there's no prediction, it's 0 points (Incorrect)
+    if prediction is None or is_prediction_missed(prediction):
+        return Points.MISSED_AND_ACCOUNTED_FOR
 
     ## Check for exact prediction: 3 points
     if (result.home_goals == prediction.predicted_home_goals and
@@ -40,16 +41,63 @@ def calculate_points(result: models.Result, prediction: models.Prediction) -> Po
     else:
         return Points.INCORRECT_PREDICTION
 
+def _get_fixtures_by_time_and_players(session: Session) -> tuple[dict[datetime, list[Fixture]], Sequence[Player]]:
+    players: Sequence[Player] = session.scalars(select(Player)).all()
+    # Only get finished fixtures that have a result recorded
+    fixtures = session.scalars(
+        select(Fixture).join(Fixture.result).where(Fixture.status == "finished")
+    ).all()
+    fixtures_by_time: dict[datetime, list[Fixture]]  = {}
+    for fixture in fixtures:
+        fixtures_by_time.setdefault(fixture.kickoff_time, []).append(fixture)
+    return fixtures_by_time, players
+
+def _score_player_for_fixture_group(session: Session, player: Player, group: list[Fixture]):
+    has_any_miss = False
+    penalty_applied = False
+
+    for fixture in group:
+        # Find if this player predicted this specific fixture
+        # We can use the back_populates relationship!
+        pred = fixture.get_prediction_for_player(player)
+
+        # A. Calculate Match Points (3, 1, or 0)
+        # Note: If pred is None, calculate_points will return 0 (Missed Match)
+        points = calculate_points(fixture.result, pred)
+
+        # B. Check if this is a "Miss" (for the penalty logic)
+        if (pred is None or is_prediction_missed(pred)) and not penalty_applied:
+            points = Points.MISSED_PREDICTION_BLOCK
+            penalty_applied = True
+
+        # C. Save the Match Score
+        score_entry = PredictionScore(
+            player_id=player.id,
+            fixture_id=fixture.id,
+            prediction_id=pred.id if pred else None,
+            points_awarded=points
+        )
+        session.add(score_entry)
+
+    # 4. After checking the whole group, apply the -1 Penalty if needed
+    if has_any_miss:
+        pass
 
 def score_fixtures(session: Session) -> None:
-    players = session.query(models.Player).all()
+    print("Scoring Predictions...")
 
-    predictions = session.scalars(
-        select(models.Prediction)
-        .join(models.Fixture)
-        .where(models.Fixture.kickoff_time < datetime.now()
-        )).all()
-    for prediction in predictions:
-        print(prediction.predicted_away_goals)
+    fixtures_by_time, players = _get_fixtures_by_time_and_players(session)
+    print(fixtures_by_time.values())
+
+    for player in players:
+        for group in fixtures_by_time.values():
+            print(f"Scoring {player.name}'s Predictions for Fixtures {group}")
+            _score_player_for_fixture_group(session, player, group)
+
+    session.commit()
+
+
+if __name__ == '__main__':
+    score_fixtures(SessionLocal())
 
 

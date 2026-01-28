@@ -3,7 +3,7 @@
 from datetime import datetime, timezone
 from sqlalchemy import (
     ForeignKey,
-    UniqueConstraint,
+    UniqueConstraint, Integer,
 )
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, Mapped, mapped_column
@@ -40,6 +40,11 @@ class Fixture(Base):
 
     home_team: Mapped[Team] = relationship("Team", foreign_keys=[home_team_id])
     away_team: Mapped[Team] = relationship("Team", foreign_keys=[away_team_id])
+    result: Mapped["Result"] = relationship(back_populates="fixture")
+    predictions: Mapped[list["Prediction"]] = relationship(back_populates="fixture")
+
+    def get_prediction_for_player(self, player: Player) -> "Prediction | None":
+        return next((p for p in self.predictions if p.player_id == player.id), None)
 
 
 class Result(Base):
@@ -53,7 +58,7 @@ class Result(Base):
     away_goals: Mapped[int] = mapped_column()
     updated_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
 
-    fixture: Mapped[Fixture] = relationship("Fixture", backref="result")
+    fixture: Mapped["Fixture"] = relationship(back_populates="result")
 
 
 class Prediction(Base):
@@ -72,7 +77,7 @@ class Prediction(Base):
     )
 
     player: Mapped[Player] = relationship("Player")
-    fixture: Mapped[Fixture] = relationship("Fixture")
+    fixture: Mapped[Fixture] = relationship(back_populates="predictions")
 
     @hybrid_property
     def predicted(self):
@@ -86,7 +91,7 @@ class PredictionScore(Base):
     player_id: Mapped[int] = mapped_column(ForeignKey("players.id"), primary_key=True)
     fixture_id: Mapped[int] = mapped_column(ForeignKey("fixtures.id"), primary_key=True)
     prediction_id: Mapped[int | None] = mapped_column(ForeignKey("predictions.id"))
-    points_awarded: Mapped[Points] = mapped_column()
+    points_awarded: Mapped[int] = mapped_column(Integer)
     calculated_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
 
     prediction: Mapped[Prediction | None] = relationship("Prediction", backref="score")

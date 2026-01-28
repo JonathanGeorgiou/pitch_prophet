@@ -6,7 +6,7 @@ from db.models import Player, Team, Fixture, Result, Prediction
 def seed():
     with SessionLocal() as session:
         # 1. Create 4 Players
-        player_names = ["Jonathan", "Alice", "Bob", "Charlie"]
+        player_names = ["Jonathan", "George", "Papi", "Nicolas"]
         players = [Player(name=name) for name in player_names]
         session.add_all(players)
         session.flush()  # This gets us the IDs from the DB without committing yet
@@ -23,9 +23,9 @@ def seed():
         # 3. Create 10 Fixtures across 3 kickoff blocks
         # We'll use 12:30, 15:00, and 17:30
         times = [
-            datetime.now(timezone.utc) - timedelta(hours=5),  # 5 hours ago
-            datetime.now(timezone.utc) - timedelta(hours=3),  # 3 hours ago
-            datetime.now(timezone.utc) - timedelta(hours=1),  # 1 hour ago
+            datetime(2026, 1, 1, 12, 30, tzinfo=timezone.utc),
+            datetime(2026, 1, 1, 15, 00, tzinfo=timezone.utc),
+            datetime(2026, 1, 1, 17, 30, tzinfo=timezone.utc),
         ]
 
         fixtures = []
