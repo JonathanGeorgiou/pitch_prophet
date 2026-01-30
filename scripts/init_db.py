@@ -1,11 +1,11 @@
 # scripts/init_db.py
 
-from db.db import engine, Base
-import db.models
+from app.db.db import engine, Base
+import app.db.models
 
 def main():
     Base.metadata.create_all(engine)
-    print("Database created successfully")
+    print(f"Database created successfully: {engine.url}")
 
 
 if __name__ == "__main__":

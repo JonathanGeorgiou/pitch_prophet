@@ -2,8 +2,10 @@
 name = "pitch_prophet"
 version = "0.1.0"
 description = "A Python application to manage and score weekly football match predictions in the Premier League."
+readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "pydantic>=2.12.5",
     "sqlalchemy>=2.0.45",
 ]
 

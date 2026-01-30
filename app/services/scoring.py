@@ -4,10 +4,9 @@ from typing import Sequence
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-import db.db
-from db.models import Prediction, Result, Player, Fixture, PredictionScore
-from db.db import SessionLocal
-from db.enums import Outcome, Points
+from app.db.models import Prediction, Result, Player, Fixture, PredictionScore
+from app.db.db import SessionLocal
+from app.db.enums import Outcome, Points
 
 
 def get_outcome(home_goals: int, away_goals: int) -> Outcome:
@@ -53,20 +52,17 @@ def _get_fixtures_by_time_and_players(session: Session) -> tuple[dict[datetime, 
     return fixtures_by_time, players
 
 def _score_player_for_fixture_group(session: Session, player: Player, group: list[Fixture]):
-    has_any_miss = False
     penalty_applied = False
 
     for fixture in group:
-        # Find if this player predicted this specific fixture
-        # We can use the back_populates relationship!
+        # Get the prediction for the player for each fixture in the group
         pred = fixture.get_prediction_for_player(player)
 
-        # A. Calculate Match Points (3, 1, or 0)
-        # Note: If pred is None, calculate_points will return 0 (Missed Match)
+        # Calculate the points per fixture, this should return 3, 1 or 0
         points = calculate_points(fixture.result, pred)
 
-        # B. Check if this is a "Miss" (for the penalty logic)
-        if (pred is None or is_prediction_missed(pred)) and not penalty_applied:
+        # Apply the penalty to the first missed prediction in the block
+        if pred is None and not penalty_applied:
             points = Points.MISSED_PREDICTION_BLOCK
             penalty_applied = True
 
@@ -78,10 +74,6 @@ def _score_player_for_fixture_group(session: Session, player: Player, group: lis
             points_awarded=points
         )
         session.add(score_entry)
-
-    # 4. After checking the whole group, apply the -1 Penalty if needed
-    if has_any_miss:
-        pass
 
 def score_fixtures(session: Session) -> None:
     print("Scoring Predictions...")

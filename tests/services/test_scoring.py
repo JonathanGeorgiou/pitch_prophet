@@ -2,10 +2,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from db import models
-from db.enums import Outcome, Points
-from db.models import Prediction, Result, Player, Fixture
-from services.scoring import get_outcome, calculate_points, is_prediction_missed, _score_player_for_fixture_group
+from app.db.enums import Outcome, Points
+from app.db.models import Prediction, Result, Player, Fixture
+from app.services.scoring import get_outcome, calculate_points, is_prediction_missed, _score_player_for_fixture_group
 
 
 @pytest.mark.parametrize("home_goals, away_goals, expected_outcome", [
@@ -33,7 +32,7 @@ def test_is_prediction_missed(prediction: Prediction, expected_result: bool):
     (Result(home_goals=2, away_goals=2), Prediction(predicted_home_goals=2, predicted_away_goals=1), Points.INCORRECT_PREDICTION),
     (Result(home_goals=1, away_goals=1), Prediction(predicted_home_goals=None, predicted_away_goals=None), Points.MISSED_AND_ACCOUNTED_FOR),
 ])
-def test_calculate_points(result: models.Result, prediction: models.Prediction, expected_points: Points):
+def test_calculate_points(result: Result, prediction: Prediction, expected_points: Points):
     actual = calculate_points(result, prediction)
     assert actual == expected_points
 

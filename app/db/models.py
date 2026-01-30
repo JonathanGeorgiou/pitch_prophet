@@ -7,8 +7,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, Mapped, mapped_column
-from db.db import Base
-from db.enums import Points
+from app.db.db import Base
 
 
 class Player(Base):
