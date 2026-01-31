@@ -32,6 +32,8 @@ def calculate_points(result: Result, prediction: Prediction | None) -> int:
         return Points.CORRECT_SCORE
 
     ## Check for correct result: 1 point
+    assert prediction.predicted_home_goals is not None
+    assert prediction.predicted_away_goals is not None
     predicted_outcome = get_outcome(prediction.predicted_home_goals, prediction.predicted_away_goals)
     actual_outcome = get_outcome(result.home_goals, result.away_goals)
 
