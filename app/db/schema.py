@@ -1,4 +1,4 @@
-# app/models.py
+# app/schema.py
 
 from datetime import datetime, timezone
 from sqlalchemy import (

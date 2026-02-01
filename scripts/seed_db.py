@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from app.db.db import SessionLocal
-from app.db.models import Player, Team, Fixture, Result, Prediction
+from app.db.schema import Player, Team, Fixture, Result, Prediction
 
 
 def seed():
