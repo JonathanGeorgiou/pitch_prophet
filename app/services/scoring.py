@@ -4,7 +4,7 @@ from typing import Sequence
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.db.models import Prediction, Result, Player, Fixture, PredictionScore
+from app.db.schema import Prediction, Result, Player, Fixture, PredictionScore
 from app.db.db import SessionLocal
 from app.db.enums import Outcome, Points
 

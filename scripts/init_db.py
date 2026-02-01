@@ -1,7 +1,7 @@
 # scripts/init_db.py
 
 from app.db.db import engine, Base
-import app.db.models
+import app.db.schema
 
 def main():
     Base.metadata.create_all(engine)

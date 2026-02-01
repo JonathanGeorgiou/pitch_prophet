@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from app.db.enums import Outcome, Points
-from app.db.models import Prediction, Result, Player, Fixture
+from app.db.schema import Prediction, Result, Player, Fixture
 from app.services.scoring import get_outcome, calculate_points, is_prediction_missed, _score_player_for_fixture_group
 
 
