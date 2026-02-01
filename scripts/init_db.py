@@ -1,12 +1,13 @@
 # scripts/init_db.py
+import logging
 
 from app.db.db import engine, Base
 import app.db.schema
 
-def main():
+def init_db():
     Base.metadata.create_all(engine)
-    print(f"Database created successfully: {engine.url}")
+    logging.info(f"Database created successfully: {engine.url}")
 
 
 if __name__ == "__main__":
-    main()
+    init_db()

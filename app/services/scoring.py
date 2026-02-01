@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from typing import Sequence
 
@@ -78,14 +79,13 @@ def _score_player_for_fixture_group(session: Session, player: Player, group: lis
         session.add(score_entry)
 
 def score_fixtures(session: Session) -> None:
-    print("Scoring Predictions...")
+    logging.info("Scoring Predictions...")
 
     fixtures_by_time, players = _get_fixtures_by_time_and_players(session)
-    print(fixtures_by_time.values())
 
     for player in players:
         for group in fixtures_by_time.values():
-            print(f"Scoring {player.name}'s Predictions for Fixtures {group}")
+            logging.debug(f"Scoring {player.name}'s Predictions for Fixtures {group}")
             _score_player_for_fixture_group(session, player, group)
 
     session.commit()
