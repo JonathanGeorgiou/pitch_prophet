@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timezone
 from app.db.db import SessionLocal
 from app.db.schema import Player, Team, Fixture, Result, Prediction
@@ -69,7 +70,7 @@ def seed():
                                submitted_time=datetime.now(timezone.utc)))
 
         session.commit()
-        print("Successfully seeded 4 players, 20 teams, 10 fixtures, and predictions!")
+        logging.info(f"Successfully seeded {len(players)} players, {len(teams)} teams, {len(fixtures)} fixtures, and predictions!")
 
 
 if __name__ == "__main__":

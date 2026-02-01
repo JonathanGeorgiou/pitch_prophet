@@ -5,7 +5,9 @@ description = "A Python application to manage and score weekly football match pr
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "dotenv>=0.9.9",
     "pydantic>=2.12.5",
+    "pydantic-settings>=2.12.0",
     "pyright>=1.1.408",
     "sqlalchemy>=2.0.45",
 ]
