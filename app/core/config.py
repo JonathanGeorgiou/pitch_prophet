@@ -9,7 +9,8 @@ load_dotenv()
 
 class Config(BaseSettings):
     app_name: str = "pitch_prophet"
-    db_name: str = os.getenv("DATABASE_NAME")
+    db_name: str = os.getenv("DATABASE_NAME", "default_db")
+
 
     @property
     def db_url(self):
